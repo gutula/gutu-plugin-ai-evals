@@ -11,6 +11,7 @@ describe("ui surface registration", () => {
   it("registers eval review surfaces in the shared AI workspace", () => {
     expect(adminContributions.workspaces).toHaveLength(0);
     expect(adminContributions.pages[0]?.route).toBe("/admin/ai/evals");
+    expect(adminContributions.pages.map((page) => page.route)).toContain("/admin/tools/eval-builder");
     expect(adminContributions.reports[0]?.route).toBe("/admin/reports/ai-regressions");
   });
 });

@@ -16,10 +16,13 @@
     "typecheck": "bunx tsc -p tsconfig.json --noEmit",
     "lint": "bunx eslint .",
     "test": "bun test",
+    "test:integration": "bun test tests/integration",
+    "test:migrations": "bun test tests/migrations",
     "test:unit": "bun test tests/unit",
     "test:contracts": "bun test tests/contracts"
   },
   "dependencies": {
+    "@platform/admin-builders": "workspace:*",
     "@platform/admin-contracts": "workspace:*",
     "@platform/ai-evals": "workspace:*",
     "@platform/ai-runtime": "workspace:*",

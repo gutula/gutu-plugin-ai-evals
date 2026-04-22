@@ -8,11 +8,11 @@ export function EvalRegressionWidget() {
   return (
     <section data-plugin-widget="ai-eval-regressions" className="awb-form-card">
       <div className="awb-inline-banner">
-        <strong>{summary.gate.passed ? "Regression gate passing" : "Regression gate blocked"}</strong>
+        <strong>{summary.releaseGate.status === "promoted" ? "Release promoted" : summary.gate.passed ? "Regression gate passing" : "Regression gate blocked"}</strong>
         <span>
           {summary.gate.reasons.length > 0
             ? summary.gate.reasons.join("; ")
-            : "Latest candidate run stays within baseline thresholds."}
+            : `Latest candidate run stays within baseline thresholds for ${summary.releaseGate.subjectId}.`}
         </span>
       </div>
     </section>

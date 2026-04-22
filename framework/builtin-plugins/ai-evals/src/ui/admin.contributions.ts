@@ -1,5 +1,6 @@
 import {
   defineAdminNav,
+  defineBuilder,
   defineCommand,
   definePage,
   defineReport,
@@ -9,11 +10,12 @@ import {
 } from "@platform/admin-contracts";
 
 import { AiEvalsAdminPage } from "./admin/main.page";
+import { EvalBuilderPage } from "./admin/eval-builder.page";
 import { EvalRegressionWidget } from "./admin/regression.widget";
 
 export const adminContributions: Pick<
   AdminContributionRegistry,
-  "workspaces" | "nav" | "pages" | "widgets" | "reports" | "commands" | "searchProviders"
+  "workspaces" | "nav" | "pages" | "widgets" | "reports" | "commands" | "searchProviders" | "builders"
 > = {
   workspaces: [],
   nav: [
@@ -29,6 +31,19 @@ export const adminContributions: Pick<
           permission: "ai.evals.read"
         }
       ]
+    }),
+    defineAdminNav({
+      workspace: "tools",
+      group: "builders",
+      items: [
+        {
+          id: "tools.eval-builder",
+          label: "Eval Builder",
+          icon: "flask-conical",
+          to: "/admin/tools/eval-builder",
+          permission: "ai.evals.rollouts.write"
+        }
+      ]
     })
   ],
   pages: [
@@ -41,6 +56,27 @@ export const adminContributions: Pick<
       group: "quality",
       permission: "ai.evals.read",
       component: AiEvalsAdminPage
+    }),
+    definePage({
+      id: "ai.eval.builder.page",
+      kind: "builder",
+      route: "/admin/tools/eval-builder",
+      label: "Eval Builder",
+      workspace: "tools",
+      group: "builders",
+      permission: "ai.evals.rollouts.write",
+      component: EvalBuilderPage,
+      builderId: "eval-builder"
+    })
+  ],
+  builders: [
+    defineBuilder({
+      id: "eval-builder",
+      label: "Eval Builder",
+      host: "admin",
+      route: "/admin/tools/eval-builder",
+      permission: "ai.evals.rollouts.write",
+      mode: "embedded"
     })
   ],
   widgets: [
@@ -77,6 +113,13 @@ export const adminContributions: Pick<
       permission: "ai.evals.read",
       href: "/admin/ai/evals",
       keywords: ["evals", "judge", "regression"]
+    }),
+    defineCommand({
+      id: "ai.open.eval-builder",
+      label: "Open Eval Builder",
+      permission: "ai.evals.rollouts.write",
+      href: "/admin/tools/eval-builder",
+      keywords: ["eval", "builder", "canary"]
     })
   ],
   searchProviders: [

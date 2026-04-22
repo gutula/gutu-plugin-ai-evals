@@ -11,9 +11,9 @@ export function AiEvalsAdminPage() {
     <section data-plugin-page="ai-evals" className="awb-surface-stack">
       <div className="awb-inline-banner">
         <strong>Eval runs and regression gates</strong>
-        <span>Golden tasks, judges, citations, and release thresholds stay visible before rollout.</span>
+        <span>Golden tasks, judges, baselines, release gates, and promotion evidence stay visible before rollout.</span>
       </div>
-      <div className="awb-inline-grid awb-inline-grid-3">
+      <div className="awb-inline-grid awb-inline-grid-4">
         <div className="awb-mini-stat">
           <span className="awb-mini-stat-label">Dataset cases</span>
           <strong className="awb-mini-stat-value">{summary.dataset.cases.length}</strong>
@@ -25,6 +25,10 @@ export function AiEvalsAdminPage() {
         <div className="awb-mini-stat">
           <span className="awb-mini-stat-label">Gate</span>
           <strong className="awb-mini-stat-value">{summary.gate.passed ? "Pass" : "Blocked"}</strong>
+        </div>
+        <div className="awb-mini-stat">
+          <span className="awb-mini-stat-label">Release gate</span>
+          <strong className="awb-mini-stat-value">{summary.releaseGate.status}</strong>
         </div>
       </div>
       <ChartSurface
@@ -62,6 +66,14 @@ export function AiEvalsAdminPage() {
           <div>
             <dt>Citation rate delta</dt>
             <dd>{summary.comparison.citationRateDelta}</dd>
+          </div>
+          <div>
+            <dt>Subject</dt>
+            <dd>{summary.candidate.subjectKind}: {summary.candidate.subjectId}</dd>
+          </div>
+          <div>
+            <dt>Replay run</dt>
+            <dd>{summary.releaseGate.replayRunId ?? "n/a"}</dd>
           </div>
         </dl>
       </div>

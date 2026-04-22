@@ -6,7 +6,7 @@
 
 Eval datasets, judges, regression baselines, and release-grade AI review.
 
-![Maturity: Baseline](https://img.shields.io/badge/Maturity-Baseline-7c3aed) ![Verification: Build+Typecheck+Lint+Test+Contracts](https://img.shields.io/badge/Verification-Build%2BTypecheck%2BLint%2BTest%2BContracts-6b7280) ![DB: postgres+sqlite](https://img.shields.io/badge/DB-postgres%2Bsqlite-2563eb) ![Integration Model: Actions+Resources+Jobs+UI](https://img.shields.io/badge/Integration%20Model-Actions%2BResources%2BJobs%2BUI-2563eb)
+![Maturity: Hardened](https://img.shields.io/badge/Maturity-Hardened-2563eb) ![Verification: Build+Typecheck+Lint+Test+Contracts](https://img.shields.io/badge/Verification-Build%2BTypecheck%2BLint%2BTest%2BContracts-6b7280) ![DB: postgres+sqlite](https://img.shields.io/badge/DB-postgres%2Bsqlite-2563eb) ![Integration Model: Actions+Resources+UI](https://img.shields.io/badge/Integration%20Model-Actions%2BResources%2BUI-2563eb)
 
 ## Part Of The Gutu Stack
 
@@ -25,23 +25,23 @@ Eval datasets, judges, regression baselines, and release-grade AI review.
 
 Owns evaluation datasets, judges, regression baselines, and the release-review evidence used to keep AI changes honest.
 
-- Exports 2 governed actions: `ai.evals.run`, `ai.evals.compare`.
-- Owns 2 resource contracts: `ai.eval-datasets`, `ai.eval-runs`.
-- Adds richer admin workspace contributions on top of the base UI surface.
+- Exports 4 governed actions: `ai.evals.run`, `ai.evals.compare`, `ai.evals.capture-baseline`, `ai.evals.promote-release`.
+- Owns 4 resource contracts: `ai.eval-datasets`, `ai.eval-runs`, `ai.eval-baselines`, `ai.eval-release-gates`.
+- Adds richer admin workspace contributions with replay-linked release-gate visibility.
 - Defines a durable data schema contract even though no explicit SQL helper module is exported.
 
 ## Maturity
 
-**Maturity Tier:** `Baseline`
+**Maturity Tier:** `Hardened`
 
-This tier is justified because unit coverage exists, and contract coverage exists.
+This tier is justified because unit, contract, integration, and migration coverage now exist, and the plugin exports governed baseline lineage and release-gate promotion contracts.
 
 ## Verified Capability Summary
 
 - Group: **AI Systems**
-- Verification surface: **Build+Typecheck+Lint+Test+Contracts**
-- Tests discovered: **3** total files across unit, contract lanes
-- Integration model: **Actions+Resources+Jobs+UI**
+- Verification surface: **Build+Typecheck+Lint+Test+Contracts+Integration+Migrations**
+- Tests discovered: **5** total files across unit, contract, integration, and migration lanes
+- Integration model: **Actions+Resources+UI**
 - Database support: **postgres + sqlite**
 
 ## Dependency And Compatibility Summary
@@ -56,17 +56,17 @@ This tier is justified because unit coverage exists, and contract coverage exist
 | Provided Capabilities | `ai.evals`, `ai.release-gates` |
 | Runtime | bun>=1.3.12 |
 | Database | postgres, sqlite |
-| Integration Model | Actions+Resources+Jobs+UI |
+| Integration Model | Actions+Resources+UI |
 
 ## Capability Matrix
 
 | Surface | Count | Details |
 | --- | --- | --- |
-| Actions | 2 | `ai.evals.run`, `ai.evals.compare` |
-| Resources | 2 | `ai.eval-datasets`, `ai.eval-runs` |
+| Actions | 4 | `ai.evals.run`, `ai.evals.compare`, `ai.evals.capture-baseline`, `ai.evals.promote-release` |
+| Resources | 4 | `ai.eval-datasets`, `ai.eval-runs`, `ai.eval-baselines`, `ai.eval-release-gates` |
 | Jobs | 0 | No job catalog exported |
 | Workflows | 0 | No workflow catalog exported |
-| UI | Present | base UI surface, admin contributions |
+| UI | Present | base UI surface, admin contributions, regression widgets |
 
 ## Quick Start For Integrators
 
@@ -92,11 +92,11 @@ Use the root repo scripts for day-to-day work **after the workspace is bootstrap
 
 ## Current Test Coverage
 
-- Root verification scripts: `bun run build`, `bun run typecheck`, `bun run lint`, `bun run test`, `bun run test:contracts`, `bun run test:unit`, `bun run docs:check`
+- Root verification scripts: `bun run build`, `bun run typecheck`, `bun run lint`, `bun run test`, `bun run test:contracts`, `bun run test:integration`, `bun run test:migrations`, `bun run test:unit`, `bun run docs:check`
 - Unit files: 2
 - Contracts files: 1
-- Integration files: 0
-- Migrations files: 0
+- Integration files: 1
+- Migrations files: 1
 
 ## Known Boundaries And Non-Goals
 
@@ -106,12 +106,10 @@ Use the root repo scripts for day-to-day work **after the workspace is bootstrap
 
 ## Recommended Next Milestones
 
+- Add emitted SQL migration assets and rollback helpers alongside the current schema-verification lane.
+- Broaden the integration matrix beyond the current company-pack release gate and replay-linked promotion flow.
 - Wire the current evaluation evidence into more release and rollout control points.
 - Add richer judge provenance and dataset lineage as the eval corpus grows.
-- Add deeper provider, persistence, or evaluation integrations only where the shipped control-plane contracts already prove stable.
-- Expand operator diagnostics and release gating where the current lifecycle already exposes strong evidence paths.
-- Add targeted integration coverage once the current lifecycle path is stable enough to benefit from end-to-end assertions.
-- Add explicit migration or rollback coverage if this domain becomes more operationally sensitive.
 - Promote important downstream reactions into explicit commands, jobs, or workflow steps instead of relying on implicit coupling.
 
 ## More Docs
