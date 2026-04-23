@@ -5,6 +5,12 @@ export default definePackage({
   kind: "ai-pack",
   version: "0.1.0",
   displayName: "AI Evals",
+  defaultCategory: {
+    id: "ai_automation",
+    label: "AI & Automation",
+    subcategoryId: "evaluation_governance",
+    subcategoryLabel: "Evaluation & Governance"
+  },
   description: "Eval datasets, judges, regression baselines, and release-grade AI review.",
   extends: ["ai-core"],
   dependsOn: ["ai-core", "audit-core", "jobs-core"],

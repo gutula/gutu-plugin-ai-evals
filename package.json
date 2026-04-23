@@ -6,15 +6,16 @@
     "framework/builtin-plugins/*"
   ],
   "scripts": {
-    "build": "bun run --cwd framework/builtin-plugins/ai-evals build",
-    "typecheck": "bun run --cwd framework/builtin-plugins/ai-evals typecheck",
-    "lint": "bun run --cwd framework/builtin-plugins/ai-evals lint",
-    "test": "bun run --cwd framework/builtin-plugins/ai-evals test",
-    "test:contracts": "bun run --cwd framework/builtin-plugins/ai-evals test:contracts",
-    "test:integration": "bun run --cwd framework/builtin-plugins/ai-evals test:integration",
-    "test:migrations": "bun run --cwd framework/builtin-plugins/ai-evals test:migrations",
-    "test:unit": "bun run --cwd framework/builtin-plugins/ai-evals test:unit",
+    "build": "cd framework/builtin-plugins/ai-evals && bun run build",
+    "typecheck": "cd framework/builtin-plugins/ai-evals && bun run typecheck",
+    "lint": "cd framework/builtin-plugins/ai-evals && bun run lint",
+    "test": "cd framework/builtin-plugins/ai-evals && bun run test",
+    "test:contracts": "cd framework/builtin-plugins/ai-evals && bun run test:contracts",
+    "test:integration": "cd framework/builtin-plugins/ai-evals && bun run test:integration",
+    "test:migrations": "cd framework/builtin-plugins/ai-evals && bun run test:migrations",
+    "test:unit": "cd framework/builtin-plugins/ai-evals && bun run test:unit",
     "docs:summary": "node scripts/docs-summary.mjs",
-    "docs:check": "node scripts/docs-check.mjs"
+    "docs:check": "node scripts/docs-check.mjs",
+    "ci": "bun run build && bun run typecheck && bun run lint && bun run test && bun run docs:check"
   }
 }

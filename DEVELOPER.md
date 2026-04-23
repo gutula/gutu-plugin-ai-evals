@@ -38,6 +38,8 @@ Owns evaluation datasets, judges, regression baselines, and the release-review e
 | Package Name | `@plugins/ai-evals` |
 | Manifest ID | `ai-evals` |
 | Display Name | AI Evals |
+| Domain Group | AI Systems |
+| Default Category | AI & Automation / Evaluation & Governance |
 | Version | `0.1.0` |
 | Kind | `ai-pack` |
 | Trust Tier | `first-party` |
@@ -68,12 +70,16 @@ Owns evaluation datasets, judges, regression baselines, and the release-review e
 | --- | --- | --- | --- |
 | Action | `ai.evals.run` | Permission: `ai.evals.run` | Non-idempotent<br>Audited |
 | Action | `ai.evals.compare` | Permission: `ai.evals.read` | Idempotent |
-| Action | `ai.evals.capture-baseline` | Permission: `ai.evals.capture-baseline` | Non-idempotent<br>Audited |
+| Action | `ai.evals.capture-baseline` | Permission: `ai.evals.capture-baseline` | Idempotent<br>Audited |
 | Action | `ai.evals.promote-release` | Permission: `ai.evals.promote` | Non-idempotent<br>Audited |
-| Resource | `ai.eval-datasets` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `label`, `caseCount`, `updatedAt` |
-| Resource | `ai.eval-runs` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `datasetId`, `status`, `passRate`, `averageScore`, `completedAt` |
-| Resource | `ai.eval-baselines` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `subjectKind`, `subjectId`, `lineageParentId`, `releaseChannel`, `capturedAt` |
-| Resource | `ai.eval-release-gates` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `subjectKind`, `subjectId`, `status`, `candidateRunId`, `promotedAt` |
+| Action | `ai.evals.rollouts.configure` | Permission: `ai.evals.rollouts.write` | Idempotent<br>Audited |
+| Action | `ai.evals.online-evidence.record` | Permission: `ai.evals.online-evidence.write` | Non-idempotent<br>Audited |
+| Resource | `ai.eval-datasets` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `label`, `caseCount`, `minPassRate`, `minAverageScore`, `minCitationRate`, `updatedAt` |
+| Resource | `ai.eval-runs` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `datasetId`, `subjectKind`, `subjectId`, `gateStatus`, `passRate`, `averageScore`, `citationRate`, `completedAt` |
+| Resource | `ai.eval-baselines` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `datasetId`, `subjectKind`, `subjectId`, `releaseChannel`, `capturedAt` |
+| Resource | `ai.eval-release-gates` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `datasetId`, `subjectKind`, `subjectId`, `status`, `createdAt` |
+| Resource | `ai.eval-rollout-rings` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `subjectId`, `ring`, `trafficPercent`, `status`, `updatedAt` |
+| Resource | `ai.eval-online-evidence` | Portal disabled | Admin auto-CRUD enabled<br>Fields: `subjectId`, `signalType`, `status`, `score`, `recordedAt` |
 
 
 
@@ -94,14 +100,14 @@ This plugin should be integrated through **explicit commands/actions, resources,
 - No standalone plugin-owned lifecycle event feed is exported today.
 - No plugin-owned job catalog is exported today.
 - No plugin-owned workflow catalog is exported today.
-- Recommended composition pattern: invoke actions, read resources, then feed release-gate and baseline decisions into the surrounding AI and company-pack rollout runtime.
+- Recommended composition pattern: invoke actions, read resources, then let the surrounding Gutu command/event/job runtime handle downstream automation.
 
 ## Storage, Schema, And Migration Notes
 
 - Database compatibility: `postgres`, `sqlite`
 - Schema file: `framework/builtin-plugins/ai-evals/db/schema.ts`
 - SQL helper file: `framework/builtin-plugins/ai-evals/src/postgres.ts`
-- Migration lane present: No
+- Migration lane present: Yes
 
 The plugin does not export a dedicated SQL helper module today. Treat the schema and resources as the durable contract instead of inventing undocumented SQL behavior.
 
@@ -109,9 +115,8 @@ The plugin does not export a dedicated SQL helper module today. Treat the schema
 
 - Action inputs can fail schema validation or permission evaluation before any durable mutation happens.
 - If downstream automation is needed, the host must add it explicitly instead of assuming this plugin emits jobs.
-- Gate promotion should fail closed when replay-linked comparisons or baseline lineage are missing.
 - There is no separate lifecycle-event feed to rely on today; do not build one implicitly from internal details.
-- Schema-affecting changes need extra care because there is no dedicated migration lane yet.
+- Schema regressions are expected to show up in the migration lane and should block shipment.
 
 ## Mermaid Flows
 
@@ -195,23 +200,22 @@ console.log("action", runEvalDatasetAction.id);
 
 ### Current truth
 
-- Exports 4 governed actions: `ai.evals.run`, `ai.evals.compare`, `ai.evals.capture-baseline`, `ai.evals.promote-release`.
-- Owns 4 resource contracts: `ai.eval-datasets`, `ai.eval-runs`, `ai.eval-baselines`, `ai.eval-release-gates`.
-- Adds richer admin workspace contributions on top of the base UI surface with replay-linked release-gate visibility.
+- Exports 6 governed actions: `ai.evals.run`, `ai.evals.compare`, `ai.evals.capture-baseline`, `ai.evals.promote-release`, `ai.evals.rollouts.configure`, `ai.evals.online-evidence.record`.
+- Owns 6 resource contracts: `ai.eval-datasets`, `ai.eval-runs`, `ai.eval-baselines`, `ai.eval-release-gates`, `ai.eval-rollout-rings`, `ai.eval-online-evidence`.
+- Adds richer admin workspace contributions on top of the base UI surface.
 - Defines a durable data schema contract even though no explicit SQL helper module is exported.
 
 ### Current gaps
 
-- Cross-repo workspace bootstrap is still required before the package can run end-to-end verification lanes in isolation.
-- The repo validates schema shape and governed release-gate behavior, but it still does not emit first-party SQL migration files from this package.
-- Judge provenance and dataset lineage are still intentionally thin while the hardened gate model settles.
+- No standalone plugin-owned event, job, or workflow catalog is exported yet; compose it through actions, resources, and the surrounding Gutu runtime.
+- The repo does not yet export a domain parity catalog with owned entities, reports, settings surfaces, and exception queues.
 
 ### Recommended next
 
-- Add emitted SQL migration assets and rollback helpers alongside the current schema-verification lane.
-- Broaden the integration matrix beyond the current company-pack release gate and replay-linked promotion flow.
 - Wire the current evaluation evidence into more release and rollout control points.
 - Add richer judge provenance and dataset lineage as the eval corpus grows.
+- Add deeper provider, persistence, or evaluation integrations only where the shipped control-plane contracts already prove stable.
+- Expand operator diagnostics and release gating where the current lifecycle already exposes strong evidence paths.
 - Promote important downstream reactions into explicit commands, jobs, or workflow steps instead of relying on implicit coupling.
 
 ### Later / optional
