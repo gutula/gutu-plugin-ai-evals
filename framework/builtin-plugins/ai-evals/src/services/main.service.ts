@@ -420,21 +420,37 @@ export function getCurrentEvalSummary(datasetId = datasetFixture.id): {
     throw new Error(`Missing baseline or candidate run for dataset '${datasetId}'.`);
   }
 
+  const comparison = compareEvalRuns(baseline, candidate);
+  const gate = checkRegressionGate(createRegressionGate(dataset.id), baseline, candidate);
+
   const releaseGate = state.releaseGates
     .filter((entry) => entry.datasetId === datasetId && entry.candidateRunId === candidate.id)
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
-
-  if (!releaseGate) {
-    throw new Error(`Missing release gate for dataset '${datasetId}'.`);
-  }
+  const effectiveReleaseGate = releaseGate
+    ? releaseGate
+    : defineReleaseGate({
+        id: `release-gate:auto:${candidate.id}`,
+        tenantId: candidate.tenantId,
+        datasetId: dataset.id,
+        baselineId: baseline.id,
+        candidateRunId: candidate.id,
+        subjectKind: candidate.subjectKind,
+        subjectId: candidate.subjectId,
+        status: gate.passed ? "passing" : "blocked",
+        reasons: gate.passed ? ["Release gate synthesized from regression summary."] : ["Release gate synthesized from a blocked regression summary."],
+        evidenceRefs: [...(candidate.evidenceRefs ?? []), baseline.id],
+        replayRunId: candidate.replayRunId,
+        createdAt: candidate.completedAt ?? candidate.startedAt,
+        promotedAt: gate.passed && candidate.rolloutRing === "stable" ? candidate.completedAt ?? candidate.startedAt : null
+      });
 
   return {
     dataset,
     baseline,
     candidate,
-    comparison: compareEvalRuns(baseline, candidate),
-    gate: checkRegressionGate(createRegressionGate(dataset.id), baseline, candidate),
-    releaseGate
+    comparison,
+    gate,
+    releaseGate: effectiveReleaseGate
   };
 }
 
@@ -779,7 +795,7 @@ function normalizeAiEvalState(state: AiEvalState): AiEvalState {
 function defineGovernedEvalRun(input: GovernedEvalRun): GovernedEvalRun {
   return Object.freeze({
     ...input,
-    evidenceRefs: [...input.evidenceRefs],
+    evidenceRefs: [...(input.evidenceRefs ?? [])],
     rolloutRing: input.rolloutRing ?? "stable",
     executionKind: input.executionKind ?? "offline"
   });
@@ -792,8 +808,8 @@ function defineGovernedEvalBaseline(input: GovernedEvalBaseline): GovernedEvalBa
 function defineReleaseGate(input: EvalReleaseGate): EvalReleaseGate {
   return Object.freeze({
     ...input,
-    reasons: [...input.reasons],
-    evidenceRefs: [...input.evidenceRefs]
+    reasons: [...(input.reasons ?? [])],
+    evidenceRefs: [...(input.evidenceRefs ?? [])]
   });
 }
 
