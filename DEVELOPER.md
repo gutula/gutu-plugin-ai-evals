@@ -54,6 +54,11 @@ Owns evaluation datasets, judges, regression baselines, and the release-review e
 | Field | Value |
 | --- | --- |
 | Depends On | `ai-core`, `audit-core`, `jobs-core` |
+| Recommended Plugins | None |
+| Capability Enhancing | None |
+| Integration Only | None |
+| Suggested Packs | None |
+| Standalone Supported | Yes |
 | Requested Capabilities | `ui.register.admin`, `api.rest.mount`, `data.write.ai`, `jobs.execute.ai` |
 | Provides Capabilities | `ai.evals`, `ai.release-gates` |
 | Owns Data | `ai.eval-datasets`, `ai.eval-runs` |
